@@ -173,6 +173,39 @@ npx supabase gen types typescript --project-id <ref> > src/lib/database.types.ts
 
 ---
 
+## Deploy ke Vercel
+
+Repo ini tidak menyimpan binding ke project Vercel mana pun, jadi bisa
+disambungkan ke project baru maupun yang sudah ada.
+
+**1. Sambungkan repo.** Di project Vercel → Settings → Git → Connect Git
+Repository → pilih `strongerEv/warkas`. Production branch diisi
+`claude/warkas-pos-umkm-26m6wm` (itu default branch repo saat ini).
+
+**2. Isi environment variable.** Settings → Environment Variables, centang
+ketiga environment (Production, Preview, Development):
+
+| Name | Value |
+|---|---|
+| `NEXT_PUBLIC_SUPABASE_URL` | URL project Supabase |
+| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | publishable key Supabase |
+
+Wajib diisi **sebelum** deploy: Next.js meng-inline variabel `NEXT_PUBLIC_*`
+ke dalam bundle saat build, jadi menambahkannya setelah build tidak
+berpengaruh sampai di-deploy ulang.
+
+**3. Deploy**, lalu salin URL hasilnya.
+
+**4. Daftarkan URL itu ke Supabase.** Authentication → URL Configuration:
+setel *Site URL* ke domain produksi, dan tambahkan `https://<domain>/**` ke
+*Redirect URLs*. Tanpa ini, tautan konfirmasi email masih mengarah ke
+`localhost` dan pendaftaran akan buntu.
+
+Setelah tersambung, setiap push ke production branch akan otomatis
+men-deploy ulang.
+
+---
+
 ## Catatan penyiapan
 
 - **Konfirmasi email.** Project Supabase baru mengaktifkan konfirmasi email.
