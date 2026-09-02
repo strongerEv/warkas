@@ -2,6 +2,7 @@
 
 import { createBrowserClient } from "@supabase/ssr";
 import type { Database } from "@/lib/database.types";
+import { supabaseEnv } from "@/lib/supabase/env";
 
 /**
  * Client Supabase untuk browser.
@@ -10,10 +11,8 @@ import type { Database } from "@/lib/database.types";
  * berubah (perintahnya ada di header src/lib/database.types.ts).
  */
 export function createClient() {
-  return createBrowserClient<Database>(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-  );
+  const { url, key } = supabaseEnv();
+  return createBrowserClient<Database>(url, key);
 }
 
 let browserClient: ReturnType<typeof createClient> | null = null;
