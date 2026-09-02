@@ -1,0 +1,76 @@
+@import "tailwindcss";
+
+@theme {
+  --color-brand-50: #ecfdf5;
+  --color-brand-100: #d1fae5;
+  --color-brand-200: #a7f3d0;
+  --color-brand-300: #6ee7b7;
+  --color-brand-400: #34d399;
+  --color-brand-500: #10b981;
+  --color-brand-600: #059669;
+  --color-brand-700: #047857;
+  --color-brand-800: #065f46;
+  --color-brand-900: #064e3b;
+
+  --font-sans: var(--font-inter), ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+:root {
+  --surface: #f4f5f7;
+  --card: #ffffff;
+  --ink: #0f172a;
+  --muted: #64748b;
+  --line: #e2e8f0;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  background: var(--surface);
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+  overscroll-behavior-y: none;
+}
+
+/* Target sentuh nyaman di tablet kasir */
+button,
+[role="button"] {
+  touch-action: manipulation;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+  border: 3px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+  background-clip: content-box;
+}
+
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  body {
+    background: #fff;
+  }
+}

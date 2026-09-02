@@ -1,0 +1,22 @@
+{
+  "name": "Warkas — Kasir & Pembukuan UMKM",
+  "short_name": "Warkas",
+  "description": "Aplikasi kasir untuk warung dan UMKM: transaksi, stok, shift, pengeluaran, dan laporan laba bersih.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#f4f5f7",
+  "theme_color": "#059669",
+  "lang": "id",
+  "categories": ["business", "finance", "productivity"],
+  "icons": [
+    { "src": "/icons/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/icons/icon-maskable.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "maskable" }
+  ],
+  "shortcuts": [
+    { "name": "Kasir", "url": "/kasir" },
+    { "name": "Laporan", "url": "/laporan" },
+    { "name": "Pengeluaran", "url": "/pengeluaran" }
+  ]
+}
