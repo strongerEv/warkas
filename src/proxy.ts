@@ -6,8 +6,9 @@ const PUBLIC_PATHS = ["/masuk", "/daftar", "/pin", "/auth"];
 export async function proxy(request: NextRequest) {
   let response = NextResponse.next({ request });
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const supabaseUrl = process.env.SUPABASE_URL || process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey =
+    process.env.SUPABASE_ANON_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
   // Tanpa konfigurasi Supabase tidak ada sesi yang bisa diperiksa. Permintaan
   // diteruskan saja supaya halaman sempat render dan menjelaskan penyebabnya,

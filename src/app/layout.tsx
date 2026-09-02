@@ -3,6 +3,8 @@ import { Inter } from "next/font/google";
 import { AppProvider } from "@/lib/app-context";
 import { ToastProvider } from "@/components/ui";
 import { PwaRegister } from "@/components/pwa-register";
+import { ConfigNeeded } from "@/components/config-needed";
+import { missingSupabaseVars, readSupabaseConfig } from "@/lib/supabase/config";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
@@ -15,6 +17,10 @@ export const metadata: Metadata = {
   appleWebApp: { capable: true, statusBarStyle: "default", title: "Warkas" },
 };
 
+// Konfigurasi Supabase dibaca per request, bukan saat build, supaya nilainya
+// tidak perlu ditanam ke bundle lewat prefix NEXT_PUBLIC_.
+export const dynamic = "force-dynamic";
+
 export const viewport: Viewport = {
   themeColor: "#059669",
   width: "device-width",
@@ -24,12 +30,18 @@ export const viewport: Viewport = {
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
+  const config = readSupabaseConfig();
+
   return (
     <html lang="id" className={inter.variable}>
       <body className="font-sans antialiased">
-        <AppProvider>
-          <ToastProvider>{children}</ToastProvider>
-        </AppProvider>
+        {config ? (
+          <AppProvider config={config}>
+            <ToastProvider>{children}</ToastProvider>
+          </AppProvider>
+        ) : (
+          <ConfigNeeded missing={missingSupabaseVars()} />
+        )}
         <PwaRegister />
       </body>
     </html>

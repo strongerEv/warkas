@@ -3,7 +3,8 @@
 import * as React from "react";
 import { useRouter } from "next/navigation";
 import type { User } from "@supabase/supabase-js";
-import { supabase } from "@/lib/supabase/client";
+import { setSupabaseConfig, supabase } from "@/lib/supabase/client";
+import type { SupabaseConfig } from "@/lib/supabase/config";
 import type { Profile, Store } from "@/lib/types";
 
 interface Session {
@@ -62,7 +63,17 @@ export function useApp() {
   return ctx;
 }
 
-export function AppProvider({ children }: { children: React.ReactNode }) {
+export function AppProvider({
+  config,
+  children,
+}: {
+  config: SupabaseConfig;
+  children: React.ReactNode;
+}) {
+  // Dipasang sebelum anak-anaknya render, supaya `supabase()` sudah siap
+  // dipakai dari mana pun tanpa perlu membaca React context.
+  setSupabaseConfig(config);
+
   const router = useRouter();
   const [session, setSession] = React.useState<Session>(EMPTY);
   const [loading, setLoading] = React.useState(true);

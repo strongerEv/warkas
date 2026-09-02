@@ -23,8 +23,8 @@ toko. Kategori produk dan kategori pengeluaran standar dibuat otomatis.
 
 | Variabel | Ambil di |
 |---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | Supabase → Project Settings → API |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | Supabase → Project Settings → API (publishable key) |
+| `SUPABASE_URL` | Supabase → Project Settings → API |
+| `SUPABASE_ANON_KEY` | Supabase → Project Settings → API (publishable key) |
 
 Service role key **tidak** dipakai aplikasi web — hanya hidup di dalam Edge
 Function, jadi tidak perlu ditaruh di environment Next.js.
@@ -187,12 +187,16 @@ ketiga environment (Production, Preview, Development):
 
 | Name | Value |
 |---|---|
-| `NEXT_PUBLIC_SUPABASE_URL` | URL project Supabase |
-| `NEXT_PUBLIC_SUPABASE_ANON_KEY` | publishable key Supabase |
+| `SUPABASE_URL` | URL project Supabase |
+| `SUPABASE_ANON_KEY` | publishable key Supabase |
 
-Wajib diisi **sebelum** deploy: Next.js meng-inline variabel `NEXT_PUBLIC_*`
-ke dalam bundle saat build, jadi menambahkannya setelah build tidak
-berpengaruh sampai di-deploy ulang.
+Keduanya boleh disimpan bertipe **Secret** — namanya sengaja tanpa prefix
+`NEXT_PUBLIC_`, karena nilainya dibaca server saat request dan dikirim lewat
+payload render, bukan ditanam ke dalam bundle saat build. Mengubah nilainya
+cukup deploy ulang biasa; build cache tidak perlu dibuang.
+
+Kalau variabel belum terisi, aplikasi tetap jalan dan menampilkan halaman yang
+menyebutkan variabel mana yang kurang, bukan halaman error.
 
 **3. Deploy**, lalu salin URL hasilnya.
 
