@@ -3,6 +3,14 @@
 Aplikasi Point of Sale untuk warung, kios, dan UMKM F&B. Fokusnya satu hal:
 pemilik tahu **laba bersih**, bukan cuma omzet kotor.
 
+```
+Omzet
+− Modal barang terjual (HPP)
+= Laba kotor
+− Pengeluaran operasional
+= Laba bersih
+```
+
 Transaksi, stok, shift kasir, dan pengeluaran dicatat di satu tempat, lalu
 dirangkum jadi laporan yang bisa diekspor ke PDF.
 
@@ -47,17 +55,29 @@ idempoten terhadapnya — sinkron dua kali tidak menghasilkan struk dobel.
 seharusnya (`modal awal + penjualan tunai − pengeluaran tunai`), kasir mengisi
 kas fisik, selisihnya langsung terlihat. Riwayat shift bisa diekspor ke PDF.
 
-**Produk & stok** — CRUD produk, gambar, SKU, batas stok menipis, penyesuaian
-stok manual yang terekam di riwayat, dan alert stok menipis di dashboard.
-Produk jasa/olahan bisa dimatikan pelacakan stoknya.
+**Produk & stok** — CRUD produk, harga modal (HPP) dengan pratinjau margin saat
+mengetik, gambar, SKU, batas stok menipis, penyesuaian stok manual yang terekam
+di riwayat, dan alert stok menipis di dashboard. Produk jasa/olahan bisa
+dimatikan pelacakan stoknya.
+
+Modal disalin ke setiap baris transaksi saat penjualan terjadi
+(`transaction_items.cost_at_sale`), bukan dibaca dari produk ketika laporan
+dibuka. Jadi kalau harga kulakan naik bulan depan, laporan bulan lalu tetap
+memakai modal yang berlaku saat itu.
 
 **Pengeluaran** — kategori custom, foto struk (privat), pembedaan sumber dana
 tunai vs non-tunai (hanya yang tunai memengaruhi kas laci), jadwal pengeluaran
 rutin, dan approval admin untuk pengeluaran kasir di atas limit toko.
 
-**Laporan** — omzet, pengeluaran, laba bersih, rata-rata per struk, tren harian,
-produk terlaris, jam ramai, breakdown metode bayar dan kategori pengeluaran,
+**Laporan** — susunan laba bertingkat (omzet → laba kotor → laba bersih) berikut
+margin masing-masing, rata-rata per struk, tren harian uang masuk vs uang keluar
+vs laba, produk terlaris dan produk paling menguntungkan (dua hal yang sering
+berbeda), jam ramai, breakdown metode bayar dan kategori pengeluaran,
 perbandingan dengan periode sebelumnya, filter per kasir, ekspor PDF.
+
+Kalau ada produk terjual yang modalnya belum diisi, laporan menampilkan
+peringatan — supaya angka laba tidak terlanjur dipercaya padahal masih terlalu
+optimistis.
 
 **Mode simulasi** — sandbox untuk demo ke calon pengguna dan training kasir.
 Lihat bagian di bawah.

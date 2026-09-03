@@ -7,7 +7,7 @@ import {
   ArrowRight,
   Banknote,
   ClipboardList,
-  Receipt,
+  Package,
   ShoppingCart,
   TrendingUp,
   Wallet,
@@ -18,7 +18,14 @@ import { listLowStock } from "@/lib/services/catalog";
 import { getOpenShift } from "@/lib/services/sales";
 import { Badge, Button, Card, EmptyState, LoadingBlock, useToast } from "@/components/ui";
 import { PageHeader } from "@/components/app-shell";
-import { PeriodFilter, SectionCard, StatCard, type PeriodState } from "@/components/report-bits";
+import {
+  HppWarning,
+  PeriodFilter,
+  ProfitLadder,
+  SectionCard,
+  StatCard,
+  type PeriodState,
+} from "@/components/report-bits";
 import { DonutChart, HourlyChart, TopProductsChart, TrendChart } from "@/components/charts";
 import { PAYMENT_METHOD_LABEL, type ComparePeriods, type DashboardReport, type Product, type Shift } from "@/lib/types";
 import { isoDate, jam, num, periodRange, rupiah } from "@/lib/format";
@@ -125,28 +132,37 @@ export default function DashboardPage() {
           label="Omzet"
           value={rupiah(report?.omzet, prefix)}
           hint={`${num(report?.jumlah_transaksi)} transaksi`}
-          tone="green"
+          tone="blue"
           icon={TrendingUp}
           compare={
             compare && { now: num(compare.sekarang.omzet), prev: num(compare.sebelumnya.omzet) }
           }
         />
         <StatCard
-          label="Pengeluaran"
-          value={rupiah(report?.pengeluaran, prefix)}
-          tone="amber"
+          label="Modal barang (HPP)"
+          value={rupiah(report?.hpp, prefix)}
+          hint="Modal barang yang terjual"
+          tone="slate"
+          icon={Package}
+          compare={compare && { now: num(compare.sekarang.hpp), prev: num(compare.sebelumnya.hpp) }}
+        />
+        <StatCard
+          label="Laba kotor"
+          value={rupiah(report?.laba_kotor, prefix)}
+          hint={`Margin ${num(report?.margin_kotor).toFixed(1)}%`}
+          tone={num(report?.laba_kotor) >= 0 ? "green" : "red"}
           icon={Wallet}
           compare={
             compare && {
-              now: num(compare.sekarang.pengeluaran),
-              prev: num(compare.sebelumnya.pengeluaran),
+              now: num(compare.sekarang.laba_kotor),
+              prev: num(compare.sebelumnya.laba_kotor),
             }
           }
         />
         <StatCard
           label="Laba bersih"
           value={rupiah(report?.laba_bersih, prefix)}
-          hint="Omzet − pengeluaran"
+          hint={`Setelah pengeluaran · margin ${num(report?.margin_bersih).toFixed(1)}%`}
           tone={num(report?.laba_bersih) >= 0 ? "green" : "red"}
           icon={Banknote}
           compare={
@@ -156,14 +172,13 @@ export default function DashboardPage() {
             }
           }
         />
-        <StatCard
-          label="Rata-rata transaksi"
-          value={rupiah(report?.rata_transaksi, prefix)}
-          hint="Nilai belanja per struk"
-          tone="blue"
-          icon={Receipt}
-        />
       </div>
+
+      {report && num(report.item_tanpa_hpp) > 0 && (
+        <div className="mb-5">
+          <HppWarning jumlah={num(report.item_tanpa_hpp)} />
+        </div>
+      )}
 
       {/* Peringatan stok menipis */}
       {lowStock.length > 0 && (
@@ -216,10 +231,11 @@ export default function DashboardPage() {
         </Card>
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
+          {report && <ProfitLadder report={report} prefix={prefix} />}
+
           <SectionCard
-            title="Tren penjualan & pengeluaran"
-            subtitle="Perbandingan uang masuk dan uang keluar per hari"
-            className="lg:col-span-2"
+            title="Tren harian"
+            subtitle="Uang masuk, uang keluar, dan sisa laba per hari"
           >
             <TrendChart data={report?.tren ?? []} />
           </SectionCard>
@@ -227,6 +243,17 @@ export default function DashboardPage() {
           <SectionCard title="Produk terlaris" subtitle="Berdasarkan jumlah terjual">
             {report?.produk_terlaris.length ? (
               <TopProductsChart data={report.produk_terlaris} />
+            ) : (
+              <EmptyState title="Belum ada penjualan produk" />
+            )}
+          </SectionCard>
+
+          <SectionCard
+            title="Produk paling menguntungkan"
+            subtitle="Bukan yang paling laku, tapi yang paling besar labanya"
+          >
+            {report?.produk_terlaba.length ? (
+              <TopProductsChart data={report.produk_terlaba} mode="laba" />
             ) : (
               <EmptyState title="Belum ada penjualan produk" />
             )}

@@ -155,12 +155,14 @@ function ProdukInner() {
       ) : (
         <Card className="overflow-hidden">
           <div className="overflow-x-auto">
-            <table className="w-full min-w-[760px] text-sm">
+            <table className="w-full min-w-[900px] text-sm">
               <thead>
                 <tr className="border-b border-slate-200 bg-slate-50 text-left text-xs uppercase tracking-wide text-slate-500">
                   <th className="px-4 py-2.5 font-medium">Produk</th>
                   <th className="px-4 py-2.5 font-medium">Kategori</th>
-                  <th className="px-4 py-2.5 text-right font-medium">Harga</th>
+                  <th className="px-4 py-2.5 text-right font-medium">Modal</th>
+                  <th className="px-4 py-2.5 text-right font-medium">Harga jual</th>
+                  <th className="px-4 py-2.5 text-right font-medium">Margin</th>
                   <th className="px-4 py-2.5 text-right font-medium">Stok</th>
                   <th className="px-4 py-2.5 font-medium">Status</th>
                   <th className="px-4 py-2.5" />
@@ -194,8 +196,29 @@ function ProdukInner() {
                         </div>
                       </td>
                       <td className="px-4 py-3 text-slate-600">{p.category?.name ?? "—"}</td>
+                      <td className="px-4 py-3 text-right tabular-nums text-slate-600">
+                        {p.cost_price > 0 ? (
+                          rupiah(p.cost_price, prefix)
+                        ) : (
+                          <span className="text-xs text-amber-600">belum diisi</span>
+                        )}
+                      </td>
                       <td className="px-4 py-3 text-right font-medium tabular-nums text-slate-900">
                         {rupiah(p.price, prefix)}
+                      </td>
+                      <td className="px-4 py-3 text-right tabular-nums">
+                        {p.cost_price > 0 && p.price > 0 ? (
+                          <span
+                            className={cx(
+                              "font-medium",
+                              p.price > p.cost_price ? "text-emerald-600" : "text-red-600",
+                            )}
+                          >
+                            {(((p.price - p.cost_price) / p.price) * 100).toFixed(0)}%
+                          </span>
+                        ) : (
+                          <span className="text-slate-300">—</span>
+                        )}
                       </td>
                       <td className="px-4 py-3 text-right">
                         {p.track_stock ? (
@@ -407,6 +430,16 @@ function ProductModal({
         </Field>
 
         <div className="grid gap-4 sm:grid-cols-2">
+          <Field label="Harga modal (HPP)" hint="Modal per unit. Dipakai menghitung laba.">
+            <Input
+              type="number"
+              inputMode="numeric"
+              value={form.cost_price ?? ""}
+              onChange={(e) => set("cost_price", Number(e.target.value))}
+              placeholder="0"
+            />
+          </Field>
+
           <Field label="Harga jual" required>
             <Input
               type="number"
@@ -417,21 +450,23 @@ function ProductModal({
               required
             />
           </Field>
-
-          <Field label="Kategori">
-            <Select
-              value={form.category_id ?? ""}
-              onChange={(e) => set("category_id", e.target.value || null)}
-            >
-              <option value="">Tanpa kategori</option>
-              {categories.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.name}
-                </option>
-              ))}
-            </Select>
-          </Field>
         </div>
+
+        <MarginPreview cost={Number(form.cost_price ?? 0)} price={Number(form.price ?? 0)} />
+
+        <Field label="Kategori">
+          <Select
+            value={form.category_id ?? ""}
+            onChange={(e) => set("category_id", e.target.value || null)}
+          >
+            <option value="">Tanpa kategori</option>
+            {categories.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </Select>
+        </Field>
 
         <div className="grid gap-4 sm:grid-cols-2">
           <Field label="SKU / Barcode" hint="Opsional">
@@ -534,6 +569,44 @@ function ProductModal({
         </div>
       </form>
     </Modal>
+  );
+}
+
+/** Menunjukkan langsung untung per unit dan marginnya saat harga diketik. */
+function MarginPreview({ cost, price }: { cost: number; price: number }) {
+  if (!price) return null;
+
+  const untung = price - cost;
+  const margin = (untung / price) * 100;
+  const rugi = untung < 0;
+
+  return (
+    <div
+      className={cx(
+        "flex flex-wrap items-baseline justify-between gap-2 rounded-xl px-4 py-3 text-sm",
+        rugi ? "bg-red-50" : cost === 0 ? "bg-slate-50" : "bg-emerald-50",
+      )}
+    >
+      {cost === 0 ? (
+        <span className="text-slate-600">
+          Modal belum diisi — laba produk ini belum bisa dihitung di laporan.
+        </span>
+      ) : (
+        <>
+          <span className={rugi ? "font-medium text-red-700" : "font-medium text-emerald-700"}>
+            {rugi ? "Harga jual di bawah modal" : "Untung per unit"}
+          </span>
+          <span
+            className={cx(
+              "tabular-nums font-bold",
+              rugi ? "text-red-700" : "text-emerald-700",
+            )}
+          >
+            {rupiah(untung)} · margin {margin.toFixed(1)}%
+          </span>
+        </>
+      )}
+    </div>
   );
 }
 

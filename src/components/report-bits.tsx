@@ -3,7 +3,8 @@
 import * as React from "react";
 import { TrendingDown, TrendingUp } from "lucide-react";
 import { Card, Input, Select, cx } from "@/components/ui";
-import { PERIOD_LABEL, deltaPersen, type PeriodPreset } from "@/lib/format";
+import { PERIOD_LABEL, deltaPersen, num, rupiah, type PeriodPreset } from "@/lib/format";
+import type { DashboardReport } from "@/lib/types";
 
 export function StatCard({
   label,
@@ -151,6 +152,117 @@ export function SectionCard({
         {action}
       </div>
       <div className="px-3 pb-4 pt-1">{children}</div>
+    </Card>
+  );
+}
+
+
+/**
+ * Susunan laba bertingkat: omzet dikurangi modal barang, lalu dikurangi
+ * pengeluaran operasional. Disajikan sebagai satu daftar menurun karena
+ * yang penting bagi pemilik toko adalah alurnya, bukan angka-angka lepas.
+ */
+export function ProfitLadder({
+  report,
+  prefix = "Rp",
+}: {
+  report: DashboardReport;
+  prefix?: string;
+}) {
+  const omzet = num(report.omzet);
+  const hpp = num(report.hpp);
+  const labaKotor = num(report.laba_kotor);
+  const pengeluaran = num(report.pengeluaran);
+  const labaBersih = num(report.laba_bersih);
+
+  return (
+    <Card className="overflow-hidden">
+      <div className="px-5 pb-1 pt-4">
+        <h2 className="text-sm font-semibold text-slate-900">Susunan laba</h2>
+        <p className="mt-0.5 text-xs text-slate-500">Dari omzet sampai uang yang benar-benar tersisa</p>
+      </div>
+
+      <dl className="px-5 py-3 text-sm">
+        <Line label="Omzet" value={rupiah(omzet, prefix)} />
+        <Line label="Modal barang terjual (HPP)" value={`− ${rupiah(hpp, prefix)}`} muted />
+
+        <Total
+          label="Laba kotor"
+          value={rupiah(labaKotor, prefix)}
+          badge={omzet > 0 ? `${num(report.margin_kotor).toFixed(1)}% dari omzet` : undefined}
+          tone={labaKotor >= 0 ? "green" : "red"}
+        />
+
+        <Line label="Pengeluaran operasional" value={`− ${rupiah(pengeluaran, prefix)}`} muted />
+
+        <Total
+          label="Laba bersih"
+          value={rupiah(labaBersih, prefix)}
+          badge={omzet > 0 ? `${num(report.margin_bersih).toFixed(1)}% dari omzet` : undefined}
+          tone={labaBersih >= 0 ? "green" : "red"}
+          strong
+        />
+      </dl>
+    </Card>
+  );
+}
+
+function Line({ label, value, muted }: { label: string; value: string; muted?: boolean }) {
+  return (
+    <div className="flex items-baseline justify-between py-1.5">
+      <dt className={muted ? "text-slate-500" : "text-slate-700"}>{label}</dt>
+      <dd className={cx("tabular-nums", muted ? "text-slate-500" : "text-slate-900")}>{value}</dd>
+    </div>
+  );
+}
+
+function Total({
+  label,
+  value,
+  badge,
+  tone,
+  strong,
+}: {
+  label: string;
+  value: string;
+  badge?: string;
+  tone: "green" | "red";
+  strong?: boolean;
+}) {
+  return (
+    <div
+      className={cx(
+        "mt-1 flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1 border-t border-slate-200 pt-2",
+        strong && "mt-2 border-t-2 border-slate-300",
+      )}
+    >
+      <dt className={cx("font-medium text-slate-900", strong && "text-base")}>{label}</dt>
+      <dd className="flex flex-wrap items-baseline gap-2">
+        {badge && <span className="text-xs text-slate-500">{badge}</span>}
+        <span
+          className={cx(
+            "font-bold tabular-nums",
+            strong ? "text-xl" : "text-base",
+            tone === "green" ? "text-emerald-700" : "text-red-600",
+          )}
+        >
+          {value}
+        </span>
+      </dd>
+    </div>
+  );
+}
+
+/** Peringatan bahwa sebagian item terjual belum punya modal, jadi laba terlihat lebih besar. */
+export function HppWarning({ jumlah }: { jumlah: number }) {
+  if (!jumlah) return null;
+
+  return (
+    <Card className="border-amber-200 bg-amber-50 p-4">
+      <p className="text-sm text-amber-900">
+        <strong>{jumlah} item terjual belum punya harga modal.</strong> Laba kotor dan laba bersih
+        di bawah ini masih terlalu tinggi. Isi kolom modal di menu Produk supaya angkanya akurat.
+      </p>
     </Card>
   );
 }

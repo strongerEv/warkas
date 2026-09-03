@@ -64,6 +64,7 @@ export async function saveProduct(
     name: input.name.trim(),
     category_id: input.category_id || null,
     price: Number(input.price ?? 0),
+    cost_price: Number(input.cost_price ?? 0),
     low_stock_threshold: Number(input.low_stock_threshold ?? 5),
     track_stock: input.track_stock ?? true,
     sku: input.sku?.trim() || null,

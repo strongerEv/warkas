@@ -71,6 +71,8 @@ export interface Product {
   category_id: string | null;
   name: string;
   price: number;
+  /** Harga pokok / modal per unit, dipakai menghitung laba kotor. */
+  cost_price: number;
   stock: number;
   low_stock_threshold: number;
   track_stock: boolean;
@@ -106,6 +108,8 @@ export interface TransactionItem {
   product_name: string;
   qty: number;
   price_at_sale: number;
+  /** Modal per unit saat transaksi terjadi, dibekukan agar laporan lama stabil. */
+  cost_at_sale: number;
   discount: number;
   subtotal: number;
 }
@@ -202,34 +206,70 @@ export interface ActivityLog {
 
 /* ---------- Bentuk hasil RPC laporan ---------- */
 
+export interface ProdukLaba {
+  nama: string;
+  qty: number;
+  omzet: number;
+  hpp?: number;
+  laba: number;
+}
+
 export interface DashboardReport {
   omzet: number;
+  /** Modal barang yang terjual (harga pokok penjualan). */
+  hpp: number;
+  /** Omzet − HPP. */
+  laba_kotor: number;
   jumlah_transaksi: number;
   total_diskon: number;
+  /** Pengeluaran operasional yang sudah disetujui. */
   pengeluaran: number;
+  /** Laba kotor − pengeluaran operasional. */
   laba_bersih: number;
+  margin_kotor: number;
+  margin_bersih: number;
+  /** Jumlah item terjual yang modalnya belum diisi — laba kotor jadi terlalu optimistis. */
+  item_tanpa_hpp: number;
   rata_transaksi: number;
-  tren: { tanggal: string; omzet: number; transaksi: number; pengeluaran: number }[];
-  produk_terlaris: { nama: string; qty: number; omzet: number }[];
+  tren: {
+    tanggal: string;
+    omzet: number;
+    transaksi: number;
+    hpp: number;
+    pengeluaran: number;
+  }[];
+  produk_terlaris: ProdukLaba[];
+  produk_terlaba: ProdukLaba[];
   per_jam: { jam: number; transaksi: number; omzet: number }[];
   metode_bayar: { metode: PaymentMethod; total: number; jumlah: number }[];
   kategori_pengeluaran: { kategori: string; warna: string; total: number }[];
 }
 
+interface PeriodTotals {
+  omzet: number;
+  hpp: number;
+  laba_kotor: number;
+  pengeluaran: number;
+  laba_bersih: number;
+  jumlah_transaksi: number;
+}
+
 export interface ComparePeriods {
-  sekarang: { omzet: number; pengeluaran: number; laba_bersih: number; jumlah_transaksi: number };
-  sebelumnya: { omzet: number; pengeluaran: number; laba_bersih: number; jumlah_transaksi: number };
+  sekarang: PeriodTotals;
+  sebelumnya: PeriodTotals;
 }
 
 export interface ShiftReport {
   shift: Shift;
   kasir: string;
   omzet: number;
+  hpp: number;
+  laba_kotor: number;
   jumlah_transaksi: number;
   penjualan_tunai: number;
   pengeluaran_tunai: number;
   pengeluaran_total: number;
   kas_seharusnya: number;
   metode_bayar: { metode: PaymentMethod; total: number; jumlah: number }[];
-  produk: { nama: string; qty: number; omzet: number }[];
+  produk: { nama: string; qty: number; omzet: number; laba: number }[];
 }

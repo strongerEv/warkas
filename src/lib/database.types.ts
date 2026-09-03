@@ -229,6 +229,7 @@ export type Database = {
       products: {
         Row: {
           category_id: string | null
+          cost_price: number
           created_at: string
           id: string
           image_url: string | null
@@ -245,6 +246,7 @@ export type Database = {
         }
         Insert: {
           category_id?: string | null
+          cost_price?: number
           created_at?: string
           id?: string
           image_url?: string | null
@@ -261,6 +263,7 @@ export type Database = {
         }
         Update: {
           category_id?: string | null
+          cost_price?: number
           created_at?: string
           id?: string
           image_url?: string | null
@@ -558,6 +561,7 @@ export type Database = {
       }
       transaction_items: {
         Row: {
+          cost_at_sale: number
           discount: number
           id: string
           price_at_sale: number
@@ -568,6 +572,7 @@ export type Database = {
           transaction_id: string
         }
         Insert: {
+          cost_at_sale?: number
           discount?: number
           id?: string
           price_at_sale: number
@@ -578,6 +583,7 @@ export type Database = {
           transaction_id: string
         }
         Update: {
+          cost_at_sale?: number
           discount?: number
           id?: string
           price_at_sale?: number
@@ -694,6 +700,7 @@ export type Database = {
         }
         Returns: {
           category_id: string | null
+          cost_price: number
           created_at: string
           id: string
           image_url: string | null
@@ -857,6 +864,7 @@ export type Database = {
         Args: { p_simulation?: boolean }
         Returns: {
           category_id: string | null
+          cost_price: number
           created_at: string
           id: string
           image_url: string | null

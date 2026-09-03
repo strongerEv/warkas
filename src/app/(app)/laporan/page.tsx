@@ -1,14 +1,21 @@
 "use client";
 
 import * as React from "react";
-import { Banknote, Download, Receipt, TrendingUp, Wallet } from "lucide-react";
+import { Banknote, Download, Package, TrendingUp, Wallet } from "lucide-react";
 import { useApp } from "@/lib/app-context";
 import { compareReport, dashboardReport } from "@/lib/services/reports";
 import { listProfiles } from "@/lib/services/admin";
 import { Button, Card, EmptyState, LoadingBlock, Select, useToast } from "@/components/ui";
 import { PageHeader } from "@/components/app-shell";
-import { PeriodFilter, SectionCard, StatCard, type PeriodState } from "@/components/report-bits";
-import { DonutChart, HourlyChart, TopProductsChart, TrendChart } from "@/components/charts";
+import {
+  HppWarning,
+  PeriodFilter,
+  ProfitLadder,
+  SectionCard,
+  StatCard,
+  type PeriodState,
+} from "@/components/report-bits";
+import { DonutChart, HourlyChart, TrendChart } from "@/components/charts";
 import { exportReportPdf } from "@/lib/pdf";
 import { PAYMENT_METHOD_LABEL, type ComparePeriods, type DashboardReport, type Profile } from "@/lib/types";
 import { isoDate, num, periodRange, rupiah, tanggal } from "@/lib/format";
@@ -121,26 +128,35 @@ export default function LaporanPage() {
           label="Omzet"
           value={rupiah(report?.omzet, prefix)}
           hint={`${num(report?.jumlah_transaksi)} transaksi`}
-          tone="green"
+          tone="blue"
           icon={TrendingUp}
           compare={compare && { now: num(compare.sekarang.omzet), prev: num(compare.sebelumnya.omzet) }}
         />
         <StatCard
-          label="Pengeluaran"
-          value={rupiah(report?.pengeluaran, prefix)}
-          tone="amber"
+          label="Modal barang (HPP)"
+          value={rupiah(report?.hpp, prefix)}
+          hint="Modal barang yang terjual"
+          tone="slate"
+          icon={Package}
+          compare={compare && { now: num(compare.sekarang.hpp), prev: num(compare.sebelumnya.hpp) }}
+        />
+        <StatCard
+          label="Laba kotor"
+          value={rupiah(report?.laba_kotor, prefix)}
+          hint={`Margin ${num(report?.margin_kotor).toFixed(1)}%`}
+          tone={num(report?.laba_kotor) >= 0 ? "green" : "red"}
           icon={Wallet}
           compare={
             compare && {
-              now: num(compare.sekarang.pengeluaran),
-              prev: num(compare.sebelumnya.pengeluaran),
+              now: num(compare.sekarang.laba_kotor),
+              prev: num(compare.sebelumnya.laba_kotor),
             }
           }
         />
         <StatCard
           label="Laba bersih"
           value={rupiah(report?.laba_bersih, prefix)}
-          hint="Omzet − pengeluaran"
+          hint={`Margin ${num(report?.margin_bersih).toFixed(1)}%`}
           tone={num(report?.laba_bersih) >= 0 ? "green" : "red"}
           icon={Banknote}
           compare={
@@ -150,14 +166,13 @@ export default function LaporanPage() {
             }
           }
         />
-        <StatCard
-          label="Total diskon"
-          value={rupiah(report?.total_diskon, prefix)}
-          hint={`Rata-rata struk ${rupiah(report?.rata_transaksi, prefix)}`}
-          tone="blue"
-          icon={Receipt}
-        />
       </div>
+
+      {report && num(report.item_tanpa_hpp) > 0 && (
+        <div className="mb-5">
+          <HppWarning jumlah={num(report.item_tanpa_hpp)} />
+        </div>
+      )}
 
       {kosong ? (
         <Card>
@@ -169,17 +184,65 @@ export default function LaporanPage() {
         </Card>
       ) : (
         <div className="grid gap-4 lg:grid-cols-2">
-          <SectionCard
-            title="Tren harian"
-            subtitle="Omzet dibanding pengeluaran"
-            className="lg:col-span-2"
-          >
+          {report && <ProfitLadder report={report} prefix={prefix} />}
+
+          <SectionCard title="Tren harian" subtitle="Uang masuk, uang keluar, dan sisa laba">
             <TrendChart data={report!.tren} />
           </SectionCard>
 
-          <SectionCard title="Produk terlaris" subtitle="10 produk dengan penjualan terbanyak">
+          <SectionCard
+            title="Produk paling menguntungkan"
+            subtitle="Diurutkan dari laba terbesar, bukan dari yang paling laku"
+            className="lg:col-span-2"
+          >
             {report!.produk_terlaris.length ? (
-              <TopProductsChart data={report!.produk_terlaris} />
+              <div className="overflow-x-auto px-2">
+                <table className="w-full min-w-[560px] text-sm">
+                  <thead>
+                    <tr className="border-b border-slate-200 text-left text-xs uppercase tracking-wide text-slate-500">
+                      <th className="px-3 py-2 font-medium">Produk</th>
+                      <th className="px-3 py-2 text-right font-medium">Terjual</th>
+                      <th className="px-3 py-2 text-right font-medium">Omzet</th>
+                      <th className="px-3 py-2 text-right font-medium">Modal</th>
+                      <th className="px-3 py-2 text-right font-medium">Laba</th>
+                      <th className="px-3 py-2 text-right font-medium">Margin</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[...report!.produk_terlaris]
+                      .sort((a, b) => num(b.laba) - num(a.laba))
+                      .map((row) => {
+                        const omzet = num(row.omzet);
+                        const laba = num(row.laba);
+                        const margin = omzet > 0 ? (laba / omzet) * 100 : 0;
+                        return (
+                          <tr key={row.nama} className="border-b border-slate-100 last:border-0">
+                            <td className="px-3 py-2 font-medium text-slate-900">{row.nama}</td>
+                            <td className="px-3 py-2 text-right tabular-nums text-slate-600">
+                              {row.qty}
+                            </td>
+                            <td className="px-3 py-2 text-right tabular-nums text-slate-900">
+                              {rupiah(omzet, prefix)}
+                            </td>
+                            <td className="px-3 py-2 text-right tabular-nums text-slate-500">
+                              {rupiah(num(row.hpp), prefix)}
+                            </td>
+                            <td
+                              className={`px-3 py-2 text-right font-medium tabular-nums ${
+                                laba >= 0 ? "text-emerald-700" : "text-red-600"
+                              }`}
+                            >
+                              {rupiah(laba, prefix)}
+                            </td>
+                            <td className="px-3 py-2 text-right tabular-nums text-slate-600">
+                              {margin.toFixed(0)}%
+                            </td>
+                          </tr>
+                        );
+                      })}
+                  </tbody>
+                </table>
+              </div>
             ) : (
               <EmptyState title="Belum ada penjualan produk" />
             )}
@@ -228,13 +291,14 @@ export default function LaporanPage() {
                     <th className="px-3 py-2 font-medium">Tanggal</th>
                     <th className="px-3 py-2 text-right font-medium">Transaksi</th>
                     <th className="px-3 py-2 text-right font-medium">Omzet</th>
+                    <th className="px-3 py-2 text-right font-medium">Modal (HPP)</th>
                     <th className="px-3 py-2 text-right font-medium">Pengeluaran</th>
-                    <th className="px-3 py-2 text-right font-medium">Laba</th>
+                    <th className="px-3 py-2 text-right font-medium">Laba bersih</th>
                   </tr>
                 </thead>
                 <tbody>
                   {report!.tren.map((t) => {
-                    const laba = num(t.omzet) - num(t.pengeluaran);
+                    const laba = num(t.omzet) - num(t.hpp) - num(t.pengeluaran);
                     return (
                       <tr key={t.tanggal} className="border-b border-slate-100 last:border-0">
                         <td className="px-3 py-2 text-slate-600">
@@ -245,6 +309,9 @@ export default function LaporanPage() {
                         </td>
                         <td className="px-3 py-2 text-right tabular-nums text-slate-900">
                           {rupiah(t.omzet, prefix)}
+                        </td>
+                        <td className="px-3 py-2 text-right tabular-nums text-slate-500">
+                          {rupiah(t.hpp, prefix)}
                         </td>
                         <td className="px-3 py-2 text-right tabular-nums text-amber-700">
                           {rupiah(t.pengeluaran, prefix)}

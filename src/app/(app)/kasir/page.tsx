@@ -956,7 +956,11 @@ function PaymentModal({
   );
 }
 
-/** Bentuk item untuk struk lokal (transaksi online mengembalikan header saja). */
+/**
+ * Bentuk item untuk struk lokal (transaksi online mengembalikan header saja).
+ * Modal sengaja dikosongkan: struk adalah dokumen untuk pembeli, dan angka
+ * HPP yang sebenarnya tetap tersimpan di database lewat `create_sale`.
+ */
 function toReceiptItems(lines: CartLine[]) {
   return lines.map((l, i) => ({
     id: `${l.product_id}-${i}`,
@@ -965,6 +969,7 @@ function toReceiptItems(lines: CartLine[]) {
     product_name: l.name,
     qty: l.qty,
     price_at_sale: l.price,
+    cost_at_sale: 0,
     discount: l.discount,
     subtotal: l.price * l.qty - l.discount,
   }));

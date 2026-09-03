@@ -98,6 +98,8 @@ export function exportShiftPdf(report: ShiftReport, storeName: string, prefix = 
     head: [["Penjualan", "Nilai"]],
     body: [
       ["Total omzet", rupiah(report.omzet, prefix)],
+      ["Modal barang (HPP)", `-${rupiah(report.hpp, prefix)}`],
+      ["Laba kotor", rupiah(report.laba_kotor, prefix)],
       ["Jumlah transaksi", `${num(report.jumlah_transaksi)} struk`],
       ["Total pengeluaran", rupiah(report.pengeluaran_total, prefix)],
       ...report.metode_bayar.map((m) => [
@@ -114,9 +116,14 @@ export function exportShiftPdf(report: ShiftReport, storeName: string, prefix = 
     autoTable(doc, {
       ...TABLE_STYLE,
       startY: y,
-      head: [["Produk terjual", "Qty", "Omzet"]],
-      body: report.produk.map((p) => [p.nama, String(p.qty), rupiah(p.omzet, prefix)]),
-      columnStyles: { 1: { halign: "right" }, 2: { halign: "right" } },
+      head: [["Produk terjual", "Qty", "Omzet", "Laba"]],
+      body: report.produk.map((p) => [
+        p.nama,
+        String(p.qty),
+        rupiah(p.omzet, prefix),
+        rupiah(p.laba, prefix),
+      ]),
+      columnStyles: { 1: { halign: "right" }, 2: { halign: "right" }, 3: { halign: "right" } },
     });
   }
 
@@ -153,12 +160,15 @@ export function exportReportPdf(
   autoTable(doc, {
     ...TABLE_STYLE,
     startY: y,
-    head: [["Ringkasan", "Nilai"]],
+    head: [["Laba rugi", "Nilai"]],
     body: [
-      ["Total omzet", rupiah(report.omzet, prefix)],
+      ["Omzet", rupiah(report.omzet, prefix)],
+      ["Modal barang terjual (HPP)", `-${rupiah(report.hpp, prefix)}`],
+      ["LABA KOTOR", `${rupiah(report.laba_kotor, prefix)}  (${num(report.margin_kotor).toFixed(1)}%)`],
+      ["Pengeluaran operasional", `-${rupiah(report.pengeluaran, prefix)}`],
+      ["LABA BERSIH", `${rupiah(report.laba_bersih, prefix)}  (${num(report.margin_bersih).toFixed(1)}%)`],
+      ["", ""],
       ["Total diskon", rupiah(report.total_diskon, prefix)],
-      ["Total pengeluaran", rupiah(report.pengeluaran, prefix)],
-      ["Laba bersih", rupiah(report.laba_bersih, prefix)],
       ["Jumlah transaksi", `${num(report.jumlah_transaksi)} struk`],
       ["Rata-rata per transaksi", rupiah(report.rata_transaksi, prefix)],
     ],
@@ -197,9 +207,22 @@ export function exportReportPdf(
     autoTable(doc, {
       ...TABLE_STYLE,
       startY: y,
-      head: [["Produk terlaris", "Qty", "Omzet"]],
-      body: report.produk_terlaris.map((p) => [p.nama, String(p.qty), rupiah(p.omzet, prefix)]),
-      columnStyles: { 1: { halign: "right" }, 2: { halign: "right" } },
+      head: [["Produk", "Qty", "Omzet", "Modal", "Laba"]],
+      body: [...report.produk_terlaris]
+        .sort((a, b) => num(b.laba) - num(a.laba))
+        .map((p) => [
+          p.nama,
+          String(p.qty),
+          rupiah(p.omzet, prefix),
+          rupiah(num(p.hpp), prefix),
+          rupiah(p.laba, prefix),
+        ]),
+      columnStyles: {
+        1: { halign: "right" },
+        2: { halign: "right" },
+        3: { halign: "right" },
+        4: { halign: "right" },
+      },
     });
     y = afterTable(doc, y);
   }
@@ -208,19 +231,21 @@ export function exportReportPdf(
     autoTable(doc, {
       ...TABLE_STYLE,
       startY: y,
-      head: [["Tanggal", "Transaksi", "Omzet", "Pengeluaran", "Laba"]],
+      head: [["Tanggal", "Trx", "Omzet", "HPP", "Pengeluaran", "Laba bersih"]],
       body: report.tren.map((t) => [
         tanggal(`${t.tanggal}T00:00:00`),
         String(t.transaksi),
         rupiah(t.omzet, prefix),
+        rupiah(t.hpp, prefix),
         rupiah(t.pengeluaran, prefix),
-        rupiah(num(t.omzet) - num(t.pengeluaran), prefix),
+        rupiah(num(t.omzet) - num(t.hpp) - num(t.pengeluaran), prefix),
       ]),
       columnStyles: {
         1: { halign: "right" },
         2: { halign: "right" },
         3: { halign: "right" },
         4: { halign: "right" },
+        5: { halign: "right" },
       },
     });
   }

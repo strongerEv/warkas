@@ -288,7 +288,7 @@ function ActiveShift({
         </div>
       </div>
 
-      <dl className="grid grid-cols-2 divide-slate-200 sm:grid-cols-3 lg:grid-cols-5 lg:divide-x">
+      <dl className="grid grid-cols-2 divide-slate-200 sm:grid-cols-3 lg:grid-cols-6 lg:divide-x">
         <Stat label="Modal awal" value={rupiah(shift.opening_cash, prefix)} />
         <Stat label="Omzet" value={rupiah(report?.omzet, prefix)} />
         <Stat
@@ -296,6 +296,7 @@ function ActiveShift({
           value={String(num(report?.jumlah_transaksi))}
           suffix="struk"
         />
+        <Stat label="Laba kotor" value={rupiah(report?.laba_kotor, prefix)} />
         <Stat label="Pengeluaran" value={rupiah(report?.pengeluaran_total, prefix)} />
         <Stat
           label="Kas seharusnya"
@@ -504,6 +505,8 @@ function ShiftDetailModal({
         <div className="grid grid-cols-2 gap-3">
           <Box label="Omzet" value={rupiah(report.omzet, prefix)} />
           <Box label="Transaksi" value={`${num(report.jumlah_transaksi)} struk`} />
+          <Box label="Modal barang (HPP)" value={rupiah(report.hpp, prefix)} />
+          <Box label="Laba kotor" value={rupiah(report.laba_kotor, prefix)} />
           <Box label="Penjualan tunai" value={rupiah(report.penjualan_tunai, prefix)} />
           <Box label="Pengeluaran" value={rupiah(report.pengeluaran_total, prefix)} />
           <Box label="Kas seharusnya" value={rupiah(report.kas_seharusnya, prefix)} />
@@ -551,11 +554,14 @@ function ShiftDetailModal({
             <p className="mb-2 font-medium text-slate-900">Produk terjual</p>
             <ul className="space-y-1">
               {report.produk.slice(0, 15).map((p) => (
-                <li key={p.nama} className="flex justify-between text-slate-600">
-                  <span>
+                <li key={p.nama} className="flex justify-between gap-3 text-slate-600">
+                  <span className="min-w-0 truncate">
                     {p.nama} <span className="text-slate-400">×{p.qty}</span>
                   </span>
-                  <span className="tabular-nums">{rupiah(p.omzet, prefix)}</span>
+                  <span className="shrink-0 tabular-nums">
+                    {rupiah(p.omzet, prefix)}
+                    <span className="ml-2 text-emerald-600">+{rupiah(p.laba, prefix)}</span>
+                  </span>
                 </li>
               ))}
             </ul>
