@@ -110,7 +110,15 @@ Deno.serve(async (req) => {
           p_code: String(body.code),
           p_pin: String(body.pin),
         });
-        if (pinError) return json({ error: pinError.message }, 400);
+
+        // Akun auth sudah terbuat pada langkah sebelumnya. Kalau pemasangan PIN
+        // gagal, akun itu dibatalkan supaya admin bisa mencoba lagi dengan email
+        // yang sama — tanpa ini, percobaan kedua ditolak "email sudah terdaftar"
+        // sementara akun setengah jadi tertinggal di daftar pengguna.
+        if (pinError) {
+          await admin.auth.admin.deleteUser(created.user.id);
+          return json({ error: `Gagal memasang PIN: ${pinError.message}` }, 400);
+        }
       }
 
       return json({ user_id: created.user.id });
