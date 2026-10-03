@@ -1,0 +1,430 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<title>Carousel — Warkas · yubuilds</title>
+<link rel="stylesheet" href="./fonts.css">
+<style>
+:root {
+  /* Merek yubuilds */
+  --merah-900:#240303; --merah-800:#3A0606; --merah-700:#5E0A0A; --merah-600:#7A0D0D;
+  --bara:#FF5A1F;
+  --kuning:#FFC21F; --kuning-2:#FFD95C;
+
+  --ink:#FFFFFF;
+  --ink-2:rgba(255,232,222,.80);
+  --ink-3:rgba(255,222,210,.56);
+  --garis:rgba(255,150,100,.22);
+  --panel:rgba(26,3,3,.46);
+
+  --pad:84px;
+  --font:'Plus Jakarta Sans','Inter',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:#140303; font-family:var(--font); -webkit-font-smoothing:antialiased; }
+
+/* Latar setiap slide */
+.slide {
+  position:relative; width:1080px; height:1350px; overflow:hidden;
+  padding:var(--pad);
+  display:flex; flex-direction:column;
+  color:var(--ink);
+  background:
+    radial-gradient(64% 44% at 50% 40%, rgba(255,96,24,.30), transparent 64%),
+    radial-gradient(96% 52% at 50% 104%, rgba(255,150,40,.24), transparent 70%),
+    linear-gradient(168deg, var(--merah-800) 0%, var(--merah-600) 44%, var(--merah-900) 100%);
+}
+
+/* Kisi teknis tipis, diredupkan di tepi */
+.slide::before {
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background-image:
+    linear-gradient(rgba(255,140,80,.075) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,140,80,.075) 1px, transparent 1px);
+  background-size:72px 72px;
+  -webkit-mask-image:radial-gradient(78% 66% at 50% 46%, #000 18%, transparent 86%);
+          mask-image:radial-gradient(78% 66% at 50% 46%, #000 18%, transparent 86%);
+}
+
+/* Garis cakrawala berpendar — hanya slide 1 */
+.slide--sampul::after {
+  content:""; position:absolute; left:0; right:0; top:62%; height:1px;
+  background:linear-gradient(90deg, transparent, rgba(255,170,90,.9), transparent);
+  filter:blur(1px); opacity:.5; pointer-events:none;
+}
+
+.slide > * { position:relative; z-index:2; }
+
+/* ---------- Kop ---------- */
+.kop { display:flex; align-items:flex-start; justify-content:space-between; }
+.tanda { display:flex; align-items:center; gap:18px; }
+.tanda .batang {
+  width:14px; height:46px; border-radius:3px;
+  background:linear-gradient(180deg, var(--kuning), var(--bara));
+  box-shadow:0 0 22px rgba(255,120,30,.6);
+}
+.tanda .baris1 { font-size:18px; font-weight:700; letter-spacing:.26em; color:var(--ink-3); text-transform:uppercase; }
+.tanda .baris2 { font-size:27px; font-weight:800; letter-spacing:-.005em; margin-top:4px; }
+.tanda .baris2 b { color:var(--kuning); font-weight:800; }
+
+.nomor { display:flex; align-items:center; gap:14px; padding-top:10px; }
+.nomor .garis { width:46px; height:2px; background:var(--garis); }
+.nomor span { font-size:21px; font-weight:700; letter-spacing:.2em; color:var(--ink-3); }
+
+/* ---------- Tipografi ---------- */
+.kicker { font-size:21px; font-weight:800; letter-spacing:.22em; text-transform:uppercase; color:var(--kuning); }
+h1 { font-size:74px; font-weight:800; letter-spacing:-.012em; line-height:1.04; text-transform:uppercase; }
+h2 { font-size:56px; font-weight:800; letter-spacing:-.012em; line-height:1.04; text-transform:uppercase; }
+h2.panjang { font-size:52px; }
+em { font-style:normal; color:var(--kuning); }
+.lead { font-size:29px; line-height:1.52; color:var(--ink-2); }
+
+/* ---------- Rel bawah ---------- */
+.rel {
+  margin-top:auto; padding-top:30px; border-top:2px solid var(--garis);
+  display:flex; align-items:center; justify-content:space-between;
+  font-size:18px; font-weight:800; letter-spacing:.2em; text-transform:uppercase; color:var(--ink-3);
+}
+.rel i { font-style:normal; color:var(--kuning); }
+
+/* ---------- Bingkai ponsel ---------- */
+.phone .bezel {
+  padding:11px; border-radius:52px;
+  background:linear-gradient(160deg,#3A1410,#140605 68%);
+  box-shadow:0 44px 100px rgba(0,0,0,.58),
+             0 0 92px rgba(255,100,30,.30),
+             0 0 0 2px rgba(255,170,120,.22) inset;
+}
+.phone .bezel img { border-radius:42px; display:block; width:100%; height:auto; }
+
+/* ================= SLIDE 1 ================= */
+.sampul-isi { padding-top:74px; max-width:556px; }
+.sampul-isi h1 { margin-top:26px; }
+.sampul-isi .lead { margin-top:30px; }
+
+.pil {
+  margin-top:auto; align-self:flex-start;
+  display:inline-flex; align-items:center; gap:12px;
+  padding:16px 30px; border-radius:999px;
+  border:2px solid var(--garis); background:var(--panel);
+  font-size:19px; font-weight:800; letter-spacing:.18em; text-transform:uppercase; color:var(--ink-2);
+}
+.pil i { font-style:normal; color:var(--kuning); }
+
+.sampul-phone { position:absolute; right:-72px; bottom:-168px; width:404px; transform:rotate(-5deg); z-index:1; }
+/* Scrim supaya rel bawah tetap terbaca di atas tangkapan layar yang terang */
+.scrim {
+  position:absolute; left:0; right:0; bottom:0; height:320px; z-index:1; pointer-events:none;
+  background:linear-gradient(180deg, transparent, rgba(20,3,3,.80) 48%, rgba(20,3,3,.95) 78%, rgba(20,3,3,.99));
+}
+
+/* ================= SLIDE 2 ================= */
+.blok { padding-top:64px; }
+.kartu-daftar { display:flex; flex-direction:column; gap:30px; padding-top:56px; }
+.kartu {
+  display:flex; gap:26px; align-items:flex-start;
+  padding:36px 38px; border-radius:24px;
+  border:2px solid var(--garis); background:var(--panel);
+}
+.kartu .no {
+  flex:none; font-size:30px; font-weight:800; color:var(--kuning);
+  letter-spacing:-.01em; line-height:1; padding-top:4px; min-width:56px;
+}
+.kartu h3 { font-size:25px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; }
+.kartu p { font-size:23px; line-height:1.52; color:var(--ink-2); margin-top:12px; }
+
+/* ================= SLIDE 3 ================= */
+.kolom { display:flex; gap:44px; align-items:flex-start; padding-top:40px; }
+.langkah { display:flex; flex-direction:column; gap:26px; flex:1; }
+.langkah > div { display:flex; gap:20px; align-items:flex-start; }
+.bulat {
+  flex:none; width:46px; height:46px; border-radius:50%;
+  display:grid; place-items:center;
+  background:linear-gradient(160deg, var(--kuning-2), var(--bara));
+  color:#2A0404; font-size:21px; font-weight:800;
+}
+.langkah h4 { font-size:24px; font-weight:800; letter-spacing:.04em; text-transform:uppercase; }
+.langkah p { font-size:21px; line-height:1.48; color:var(--ink-2); margin-top:7px; }
+
+.catatan {
+  margin-top:auto; padding:26px 32px; border-radius:22px;
+  border:2px solid rgba(255,194,31,.34); background:rgba(255,194,31,.09);
+}
+.catatan b { color:var(--kuning); font-weight:800; }
+.catatan p { font-size:22px; line-height:1.5; color:var(--ink-2); }
+
+/* ================= SLIDE 4 ================= */
+.jajar { display:flex; gap:30px; justify-content:space-between; padding-top:46px; }
+.jajar figure { width:248px; }
+.jajar figcaption { margin-top:22px; }
+.jajar figcaption b { display:block; font-size:21px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; }
+.jajar figcaption span { display:block; font-size:19px; line-height:1.42; color:var(--ink-2); margin-top:8px; }
+
+.chips { display:flex; flex-wrap:wrap; gap:14px; margin-top:auto; padding-top:44px; }
+.chips span {
+  padding:12px 22px; border-radius:999px;
+  border:2px solid var(--garis); background:var(--panel);
+  font-size:18px; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:var(--ink-2);
+}
+
+/* ================= SLIDE 5 ================= */
+.spek { display:flex; flex-direction:column; gap:20px; padding-top:40px; }
+.spek > div { display:flex; gap:28px; align-items:baseline; }
+.spek dt {
+  flex:none; width:188px; font-size:19px; font-weight:800;
+  letter-spacing:.14em; text-transform:uppercase; color:var(--kuning);
+}
+.spek dd { font-size:23px; line-height:1.46; color:var(--ink-2); }
+
+.cta {
+  margin-top:auto; padding:38px 42px; border-radius:28px;
+  border:2px solid var(--garis); background:var(--panel);
+}
+.cta h3 { font-size:30px; font-weight:800; letter-spacing:.03em; text-transform:uppercase; }
+.cta p { font-size:22px; line-height:1.5; color:var(--ink-2); margin-top:12px; }
+.tombol {
+  display:inline-block; margin-top:26px; padding:19px 38px; border-radius:16px;
+  background:linear-gradient(135deg, var(--kuning-2), var(--kuning));
+  color:#2A0404; font-size:22px; font-weight:800; letter-spacing:.14em; text-transform:uppercase;
+}
+</style>
+</head>
+<body>
+
+<!-- ============ 1 · SAMPUL ============ -->
+<section class="slide slide--sampul" id="slide-1">
+  <header class="kop">
+    <div class="tanda">
+      <div class="batang"></div>
+      <div>
+        <div class="baris1">Project File</div>
+        <div class="baris2">BY <b>YUBUILDS</b></div>
+      </div>
+    </div>
+    <div class="nomor"><div class="garis"></div><span>— 01 / 05</span></div>
+  </header>
+
+  <div class="sampul-isi">
+    <div class="kicker">Studi Kasus · Aplikasi Kasir UMKM</div>
+    <h1>Tahu omzet,<br>tidak tahu<br><em>laba bersih</em></h1>
+    <p class="lead">Warkas mencatat transaksi, stok, shift kasir, dan pengeluaran — lalu merangkumnya jadi satu angka yang jarang diketahui pemilik warung: sisa uang yang benar-benar jadi miliknya.</p>
+  </div>
+
+  <div class="pil">Geser untuk lihat <i>→</i></div>
+
+  <div class="phone sampul-phone">
+    <div class="bezel"><img src="./src/kasir.webp" alt="Layar kasir Warkas"></div>
+  </div>
+  <div class="scrim"></div>
+
+  <footer class="rel">
+    <span>Idea <i>→</i> System <i>→</i> App</span>
+    <span>Warkas · Aplikasi Kasir UMKM</span>
+  </footer>
+</section>
+
+<!-- ============ 2 · MASALAH ============ -->
+<section class="slide" id="slide-2">
+  <header class="kop">
+    <div class="tanda">
+      <div class="batang"></div>
+      <div>
+        <div class="baris1">Project File</div>
+        <div class="baris2">BY <b>YUBUILDS</b></div>
+      </div>
+    </div>
+    <div class="nomor"><div class="garis"></div><span>— 02 / 05</span></div>
+  </header>
+
+  <div class="blok">
+    <div class="kicker">Masalah yang dipecahkan</div>
+    <h2 style="margin-top:22px">Tiga hal yang bikin<br>pembukuan warung <em>buntu</em></h2>
+  </div>
+
+  <div class="kartu-daftar">
+    <div class="kartu">
+      <div class="no">01</div>
+      <div>
+        <h3>Dicatat di buku tulis</h3>
+        <p>Transaksi ditulis tangan, rekapnya menunggu akhir bulan. Saat angkanya tidak cocok, tidak ada jejak untuk ditelusuri.</p>
+      </div>
+    </div>
+    <div class="kartu">
+      <div class="no">02</div>
+      <div>
+        <h3>Omzet dikira laba</h3>
+        <p>Uang masuk terlihat besar. Modal barang yang terjual dan biaya operasional tidak pernah ikut dikurangkan.</p>
+      </div>
+    </div>
+    <div class="kartu">
+      <div class="no">03</div>
+      <div>
+        <h3>Kas laci selalu selisih</h3>
+        <p>Tanpa catatan modal awal dan pengeluaran tunai per shift, selisih uang di laci tidak ketahuan asalnya.</p>
+      </div>
+    </div>
+  </div>
+
+  <footer class="rel">
+    <span>Idea <i>→</i> System <i>→</i> App</span>
+    <span>Warkas · Aplikasi Kasir UMKM</span>
+  </footer>
+</section>
+
+<!-- ============ 3 · FITUR INTI ============ -->
+<section class="slide" id="slide-3">
+  <header class="kop">
+    <div class="tanda">
+      <div class="batang"></div>
+      <div>
+        <div class="baris1">Project File</div>
+        <div class="baris2">BY <b>YUBUILDS</b></div>
+      </div>
+    </div>
+    <div class="nomor"><div class="garis"></div><span>— 03 / 05</span></div>
+  </header>
+
+  <div class="blok">
+    <div class="kicker">Fitur inti</div>
+    <h2 class="panjang" style="margin-top:22px">Tiap transaksi langsung<br>jadi <em>angka laba</em></h2>
+  </div>
+
+  <div class="kolom">
+    <div class="langkah">
+      <div>
+        <div class="bulat">1</div>
+        <div>
+          <h4>Kasir tap produk</h4>
+          <p>Satu ketukan menambah barang ke keranjang. Stok terpotong saat transaksi selesai.</p>
+        </div>
+      </div>
+      <div>
+        <div class="bulat">2</div>
+        <div>
+          <h4>Modal ikut tercatat</h4>
+          <p>Harga pokok tiap barang disalin ke baris transaksi pada detik penjualan.</p>
+        </div>
+      </div>
+      <div>
+        <div class="bulat">3</div>
+        <div>
+          <h4>Laba tersusun sendiri</h4>
+          <p>Omzet dikurangi modal jadi laba kotor, dikurangi pengeluaran jadi laba bersih.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="phone" style="width:300px;flex:none">
+      <div class="bezel"><img src="./src/dashboard.webp" alt="Susunan laba di dashboard Warkas"></div>
+    </div>
+  </div>
+
+  <div class="catatan">
+    <p><b>Modal dibekukan per transaksi.</b> Harga kulakan naik bulan depan tidak akan mengubah laporan bulan lalu — angka yang sudah tercatat tetap apa adanya.</p>
+  </div>
+
+  <footer class="rel">
+    <span>Idea <i>→</i> System <i>→</i> App</span>
+    <span>Warkas · Aplikasi Kasir UMKM</span>
+  </footer>
+</section>
+
+<!-- ============ 4 · ISI APLIKASI ============ -->
+<section class="slide" id="slide-4">
+  <header class="kop">
+    <div class="tanda">
+      <div class="batang"></div>
+      <div>
+        <div class="baris1">Project File</div>
+        <div class="baris2">BY <b>YUBUILDS</b></div>
+      </div>
+    </div>
+    <div class="nomor"><div class="garis"></div><span>— 04 / 05</span></div>
+  </header>
+
+  <div class="blok">
+    <div class="kicker">Isi aplikasinya</div>
+    <h2 style="margin-top:22px">Yang dibuka <em>setiap hari</em></h2>
+    <p class="lead" style="margin-top:22px;max-width:820px">Dari melayani pembeli di depan, sampai menutup laci saat warung tutup.</p>
+  </div>
+
+  <div class="jajar">
+    <figure>
+      <div class="phone"><div class="bezel"><img src="./src/laporan.webp" alt="Laporan laba Warkas"></div></div>
+      <figcaption>
+        <b>Laporan laba</b>
+        <span>Omzet, modal, sisa laba</span>
+      </figcaption>
+    </figure>
+    <figure>
+      <div class="phone"><div class="bezel"><img src="./src/produk.webp" alt="Form produk dengan harga modal"></div></div>
+      <figcaption>
+        <b>Harga modal</b>
+        <span>Margin terlihat langsung</span>
+      </figcaption>
+    </figure>
+    <figure>
+      <div class="phone"><div class="bezel"><img src="./src/shift.webp" alt="Shift kasir Warkas"></div></div>
+      <figcaption>
+        <b>Shift kasir</b>
+        <span>Selisih kas ketahuan</span>
+      </figcaption>
+    </figure>
+  </div>
+
+  <div class="chips">
+    <span>Mode offline</span>
+    <span>Struk 58mm</span>
+    <span>Login PIN</span>
+    <span>Mode simulasi</span>
+    <span>Export PDF</span>
+    <span>Alert stok</span>
+  </div>
+
+  <footer class="rel">
+    <span>Idea <i>→</i> System <i>→</i> App</span>
+    <span>Warkas · Aplikasi Kasir UMKM</span>
+  </footer>
+</section>
+
+<!-- ============ 5 · PENUTUP ============ -->
+<section class="slide" id="slide-5">
+  <header class="kop">
+    <div class="tanda">
+      <div class="batang"></div>
+      <div>
+        <div class="baris1">Project File</div>
+        <div class="baris2">BY <b>YUBUILDS</b></div>
+      </div>
+    </div>
+    <div class="nomor"><div class="garis"></div><span>— 05 / 05</span></div>
+  </header>
+
+  <div class="blok">
+    <div class="kicker">Dari ide jadi aplikasi</div>
+    <h2 style="margin-top:22px">Pembukuan warung<br>tidak harus <em>rumit</em></h2>
+    <p class="lead" style="margin-top:24px;max-width:860px">Berangkat dari satu pertanyaan: kenapa pemilik warung harus menunggu akhir bulan untuk tahu usahanya untung atau tidak.</p>
+  </div>
+
+  <dl class="spek">
+    <div><dt>Antarmuka</dt><dd>Next.js 16 · React 19 · TypeScript · Tailwind</dd></div>
+    <div><dt>Data</dt><dd>Supabase Postgres, akses dibatasi per peran lewat RLS</dd></div>
+    <div><dt>Logika</dt><dd>Ditaruh di database sebagai RPC, bukan dititipkan ke browser</dd></div>
+    <div><dt>Offline</dt><dd>IndexedDB menampung transaksi, tersinkron begitu online</dd></div>
+  </dl>
+
+  <div class="cta">
+    <h3>Punya proses yang masih manual?</h3>
+    <p>Ceritakan alurnya — nanti kita bongkar bareng dan cari bentuk sistemnya.</p>
+    <div class="tombol">[ DM @yubuilds ]</div>
+  </div>
+
+  <footer class="rel">
+    <span>Idea <i>→</i> System <i>→</i> App</span>
+    <span>Warkas · Aplikasi Kasir UMKM</span>
+  </footer>
+</section>
+
+</body>
+</html>

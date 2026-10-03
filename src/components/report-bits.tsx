@@ -143,7 +143,10 @@ export function SectionCard({
   className?: string;
 }) {
   return (
-    <Card className={className}>
+    // `min-w-0` wajib: tanpa ini anak grid memakai min-width:auto, sehingga
+    // tabel ber-min-width di dalamnya melebarkan kolom dan membuat halaman
+    // meluber ke samping di layar ponsel.
+    <Card className={cx("min-w-0", className)}>
       <div className="flex flex-wrap items-start justify-between gap-3 px-5 pb-2 pt-4">
         <div>
           <h2 className="text-sm font-semibold text-slate-900">{title}</h2>
@@ -176,7 +179,7 @@ export function ProfitLadder({
   const labaBersih = num(report.laba_bersih);
 
   return (
-    <Card className="overflow-hidden">
+    <Card className="min-w-0 overflow-hidden">
       <div className="px-5 pb-1 pt-4">
         <h2 className="text-sm font-semibold text-slate-900">Susunan laba</h2>
         <p className="mt-0.5 text-xs text-slate-500">Dari omzet sampai uang yang benar-benar tersisa</p>
